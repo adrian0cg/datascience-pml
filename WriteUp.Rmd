@@ -1,0 +1,13 @@
+---
+title: "PML-Course Project"
+author: "Adrian CG"
+date: "22 Jan 2015"
+output: html_document
+---
+
+```{r downloadData, echo=FALSE, results='hide', cache=TRUE}
+training <- read.csv("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+testing <- read.csv("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+```
+
+
