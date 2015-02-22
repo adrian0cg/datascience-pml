@@ -12,8 +12,8 @@ bibliography: bibliography.bib
 ```{r downloadData, echo=FALSE, results='hide', cache=FALSE}
 library("knitcitations"); cleanbib(); bib <- read.bibtex("bibliography.bib");
 source("utils.R")
-pmlTraining <- read.csv("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
-pmlTesting <- read.csv("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+pmlTraining <- read.csv("training.csv")
+pmlTesting <- read.csv("testing.csv")
 ```
 
 ## Data Preprocessing
@@ -27,18 +27,34 @@ for (i in 8:159) {
 str(pmlTraining[,c(1:8,159,160)])
 ```
 
-After manual inspection of the entries in the training set, we found some samples at the end of each execrise window containing a full set of the derived variables, while others (beginning and within windows) only contain the base measurements. For classification purposes of a whole movement as mentioned in the original paper `r citep(bib[["Velloso2013"]])`, the derived variables seem to be a better fit. However, sine they are rather sparse and can't be recomputed for single points within the exercise repetion, we constrain ourselves to the 93 variables that don't contain `NA`s.
-
-```{r restrictMeasured, echo=TRUE, cache=TRUE}
-useableColumns <- apply(!is.na(pmlTraining), 2, any)
-pmlTraining <- pmlTraining[,useableColumns]
-pmlTesting <- pmlTesting[,useableColumns]
-```
 
 ## Prediction
 ### Data-Splitting
+```{r createDataPartition, echo=TRUE, cache=TRUE}
+inTrain <- createFolds(pmlTraining$classe, k=4)
+```
 
 ### Model Building
+#### Feature Selection
+After manual inspection of the entries in the training set, we found some samples at the end of each execrise window containing a full set of the derived variables, while others (beginning and within windows) only contain the base measurements. For classification purposes of a whole movement as mentioned in the original paper `r citep(bib[["Velloso2013"]])`, the derived variables seem to be a better fit. However, sine they are rather sparse and can't be recomputed for single points within the exercise repetion, we constrain ourselves to the variables that don't contain `NA`s.
+
+```{r restrictMeasured, echo=TRUE, cache=TRUE}
+measuredColumns <- !apply(is.na(pmlTesting), 2, any)
+```
+
+To check the existing data for some zero variance abnomalities, that could also negatively influence the prediction, we use the zero variance checks of the `caret` package and will subsequently remove them.
+```{r removeNZV, echo=TRUE, cache=TRUE}
+nzvPml <- nearZeroVar(pmlTraining, saveMetrics= TRUE)
+```
+
+Likewise, for certain prediction algorithms, which are not model bound, it would be a bad unwise to leave predictors in the dataset, that have unique values for most entries like the `X`, `new_window`, `num_window`, `raw_timestamp_part_1` that could lead to overfitting. Also `cvtd_timestamp` is somewhat synonymous to `user_name`. Thus we retain as simplified dataset:
+
+```{r removeOverfitters, echo=TRUE, cache=TRUE}
+removeOverfitters <- rep(TRUE,160); overfitters[c(1,3,5,7)] = FALSE;
+pmlTrain <- pmlTraining[, !(nzvPml$zeroVar | nzvPml$nzv) & measuredColumns & removeOverfitters]
+pmlTest <- pmlTesting[, !(nzvPml$zeroVar | nzvPml$nzv) & measuredColumns & removeOverfitters]
+```
+
 
 ### Assessing Prediction Accuracy
 
