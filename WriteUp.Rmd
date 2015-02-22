@@ -1,13 +1,57 @@
 ---
 title: "PML-Course Project"
 author: "Adrian CG"
-date: "22 Jan 2015"
-output: html_document
+date: "22 Feb 2015"
+output:
+  html_document:
+    keep_md: yes
+    theme: journal
+bibliography: bibliography.bib
 ---
 
-```{r downloadData, echo=FALSE, results='hide', cache=TRUE}
-training <- read.csv("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
-testing <- read.csv("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
+```{r downloadData, echo=FALSE, results='hide', cache=FALSE}
+library("knitcitations"); cleanbib(); bib <- read.bibtex("bibliography.bib");
+source("utils.R")
+pmlTraining <- read.csv("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv")
+pmlTesting <- read.csv("http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv")
 ```
 
+## Data Preprocessing
+On the first glance into the data, we observe a lot of wrongly concluded data types for the scalar measurement columns (ranging from 8 to 159). Thus, we coerce them to the appropriate numeric classes:
+
+```{r correctClasses, cache=TRUE}
+for (i in 8:159) {
+    pmlTraining[,i] <- as.numeric(pmlTraining[,i])
+    pmlTesting[,i] <- as.numeric(pmlTesting[,i])
+}
+str(pmlTraining[,c(1:8,159,160)])
+```
+
+After manual inspection of the entries in the training set, we found some samples at the end of each execrise window containing a full set of the derived variables, while others (beginning and within windows) only contain the base measurements. For classification purposes of a whole movement as mentioned in the original paper `r citep(bib[["Velloso2013"]])`, the derived variables seem to be a better fit. However, sine they are rather sparse and can't be recomputed for single points within the exercise repetion, we constrain ourselves to the 93 variables that don't contain `NA`s.
+
+```{r restrictMeasured, echo=TRUE, cache=TRUE}
+useableColumns <- apply(!is.na(pmlTraining), 2, any)
+pmlTraining <- pmlTraining[,useableColumns]
+pmlTesting <- pmlTesting[,useableColumns]
+```
+
+## Prediction
+### Data-Splitting
+
+### Model Building
+
+### Assessing Prediction Accuracy
+
+### Application on Original Test-Dataset
+
+## References
+```{r bibiliography, echo=FALSE, cache=TRUE, message=FALSE, results='asis'}
+print(bibliography(), "html")
+```
+
+## Appendix
+### Raw Usable Parameter List
+```{r usableParameters, echo=FALSE, cache=TRUE}
+str(names(pmlTraining),vec.len=160)
+```
 
