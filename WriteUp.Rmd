@@ -62,7 +62,17 @@ pmlTest <- pmlTesting[, !(nzvPml$zeroVar | nzvPml$nzv) & measuredColumns & remov
 ### Algorithm Selection
 We have been trying to get a successful computation run using the `caret` package and any of the many models available therein, however all tried algorithms (using the parallel computation routines available) ended up consuming all available ressources (some CPU-bound, some Memory-Bound) of our Late 2013 MacBook Pro (4 cores, 16GB). Thus, we resolved to a "simpler" model using random forests from the `randomForest` package.
 
-### Assessing Prediction Accuracy
+### Computing Model & Assessing Prediction Accuracy
+Since `randomForest` allows for computation of the model combined with an assessment of the prediction accuracy for a "test set" (here it will be our `pmlEval` set) in one pass, we compute that jointly:
+```{r computeRandomForest, cache=TRUE}
+regressors <- colnames(pmlTrain)!= "classe";
+halRF <- randomForest(
+    x=pmlTrain[,regressors], y=pmlTrain[,"classe"],
+    xtest=pmlEval[,regressors], ytest=pmlEval[,"classe"],
+    importance=TRUE, proximity=TRUE, keep.forest=TRUE
+);
+print(halRF)
+```
 
 ### Application on Original Test-Dataset
 
