@@ -64,8 +64,8 @@ We have been trying to get a successful computation run using the `caret` packag
 
 ### Computing Model & Assessing Prediction Accuracy
 Since `randomForest` allows for computation of the model combined with an assessment of the prediction accuracy for a "test set" (here it will be our `pmlEval` set) in one pass, we compute that jointly:
-```{r computeRandomForest, cache=TRUE}
-regressors <- colnames(pmlTrain)!= "classe";
+```{r computeRandomForest, cache=FALSE}
+regressors <- !(colnames(pmlTrain)== "classe");
 halRF <- randomForest(
     x=pmlTrain[,regressors], y=pmlTrain[,"classe"],
     xtest=pmlEval[,regressors], ytest=pmlEval[,"classe"],
@@ -74,7 +74,7 @@ halRF <- randomForest(
 print(halRF)
 ```
 
-Thus the compelling results for this test run using 60% of the training set as trainign, 40% as evaluation leads to a prediction accuracy estimate of the out of bag error estimate from 0.61% and a error rate estimation on our evaluation set 0.65%.
+Thus the compelling results for this test run using 60% of the training set as trainign, 40% as evaluation leads to a prediction accuracy estimate of the *out of bag error estimate from 0.61%* and an *error rate estimation on our evaluation set of 0.65%*.
 
 ### Application on Original Test-Dataset
 Hence, we are now ready to to apply the generated model towards the "real" test set
@@ -97,4 +97,3 @@ print(bibliography(), "html")
 ```{r usableParameters, echo=FALSE, cache=TRUE}
 str(names(pmlTrain),vec.len=55)
 ```
-
