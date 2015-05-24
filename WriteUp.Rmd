@@ -74,7 +74,18 @@ halRF <- randomForest(
 print(halRF)
 ```
 
+Thus the compelling results for this test run using 60% of the training set as trainign, 40% as evaluation leads to a prediction accuracy estimate of the out of bag error estimate from 0.61% and a error rate estimation on our evaluation set 0.65%.
+
 ### Application on Original Test-Dataset
+Hence, we are now ready to to apply the generated model towards the "real" test set
+```{r computeTestPrediction, cache=TRUE}
+pmlTestPrediction <- predict(halRF, newdata=pmlTest, proximity=TRUE)
+print(pmlTestPrediction$predicted)
+```
+and generate the submission output
+```{r generatePredictionOutput, echo=TRUE, results='hide', cache=TRUE}
+pml_write_files(pmlTestPrediction$predicted)
+```
 
 ## References
 ```{r bibiliography, echo=FALSE, cache=TRUE, message=FALSE, results='asis'}
